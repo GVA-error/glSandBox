@@ -13,7 +13,9 @@
 #include "fragmentShaderExample.h"
 #include "vertexShaderExample.h"
 
-const bool SUBTEXTURE_BINDING = true;
+#define BUFFER_OFFSET(i) ((char *)NULL + (i))
+
+const bool SUBTEXTURE_BINDING = false;
 
 const GLuint w_width  = 800;
 const GLuint w_height = 600;
@@ -33,9 +35,9 @@ const GLuint tc_w=3;
 const GLuint tc_h=1;
 const GLuint tc_d=1;
 GLuint textureColorData[] = {
-	255, 0, 0,
-	0, 255, 0,
-	0, 0, 255
+	125, 125, 125,
+	125, 125, 125,
+	125, 125, 125
 };
 
 //Positions/proportions texture data and sizes
@@ -53,6 +55,7 @@ void fillTextures();  // init colorTexture and colorPositionsTexture from textur
 bool drawFrame();     // check events and draw scene
 void drawScene();     // draw buffered data
 
+void texParameter(int i_param);
 bool is_exitEvent(SDL_Event& ev);
 bool init();
 
@@ -134,29 +137,44 @@ void drawScene()
 
 }
 
+void texParameter(int i_param)
+{
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+}
+
 void fillTextures()
 {
+	glGenTextures(1, &colorTexture);
 	if (SUBTEXTURE_BINDING)
 	{
 		glBindTexture(GL_TEXTURE_3D, colorTexture);
-		glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, tc_w, tc_h, tc_d, GL_BGR, GL_UNSIGNED_BYTE, textureColorData);
+		glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, tc_w, tc_h, tc_d, GL_RGB, GL_UNSIGNED_BYTE, textureColorData);
 	}
 	else
 	{
 		glBindTexture(GL_TEXTURE_3D, colorTexture);
-		glTexImage3D(GL_TEXTURE_3D, 0, GL_BGR, tc_w, tc_h, tc_d, 0, GL_BGR, GL_UNSIGNED_BYTE, textureColorData);
+		glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB, tc_w, tc_h, tc_d, 0, GL_RGB, GL_UNSIGNED_BYTE, textureColorData);
 	}
-
+	texParameter(0);
+	/*glBindTexture(GL_TEXTURE_3D, 0);
+	
+	glGenTextures(1, &colorPositionsTexture);
+	texParameter(1);
 	glBindTexture(GL_TEXTURE_3D, colorPositionsTexture);
-	glTexImage3D(GL_TEXTURE_3D, 0, GL_BGR, tp_w, tp_h, tp_d, 0, GL_BGR, GL_UNSIGNED_BYTE, texturePositionsData);
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_R, tp_w, tp_h, tp_d, 0, GL_R, GL_UNSIGNED_BYTE, texturePositionsData);
+	glBindTexture(GL_TEXTURE_3D, 0);*/
 }
 
 void bindBuffers()
 {
 	GLfloat vertices[] = {   
-		 0.5f, -0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		 0.0f,  0.5f, 0.0f
+		 0.5f, -0.5f, 0.0f, 1.0, 0.0,
+		-0.5f, -0.5f, 0.0f, 0.0, 0.0,
+		 0.0f,  0.5f, 0.0f, 0.5, 1.0,
 	};
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -166,8 +184,11 @@ void bindBuffers()
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	size_t stride = 5 * sizeof(GLfloat);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, BUFFER_OFFSET(0));
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, BUFFER_OFFSET(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
 
 	glBindVertexArray(0);
 }
