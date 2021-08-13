@@ -26,6 +26,9 @@ GLuint shaderProgram = GL_NONE;
 GLuint colorTexture = GL_NONE;
 GLuint colorPositionsTexture = GL_NONE;
 
+GLuint colorTextLoc = GL_NONE;
+GLuint proportionsTextLoc = GL_NONE;
+
 // drawing data
 GLuint VBO = GL_NONE;
 GLuint VAO = GL_NONE;
@@ -35,17 +38,17 @@ const GLuint tc_w=3;
 const GLuint tc_h=1;
 const GLuint tc_d=1;
 GLfloat textureColorData[] = {
-	1.0, 0, 0,
-	0, 1.0, 0,
-	0, 0, 1.0
+	1.0, 0.0, 0.0,
+	0.0, 1.0, 0.0,
+	0.0, 0.0, 1.0
 };
 
 //Positions/proportions texture data and sizes
 const GLuint tp_w = 11;
 const GLuint tp_h = 1;
 const GLuint tp_d = 1;
-GLuint texturePositionsData[] = {
-	0, 0, 0, 0, 0, 125, 255, 255, 255, 255, 255
+GLfloat texturePositionsData[] = {
+	0.0, 0.5, 0.5, 0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0
 };
 
 bool initGlContext(); // init gl, sdl etc.
@@ -124,7 +127,6 @@ void drawScene()
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glUseProgram(shaderProgram);
-
 	glActiveTexture(GL_TEXTURE0 + 0);
 	glBindTexture(GL_TEXTURE_3D, colorTexture);
 	glActiveTexture(GL_TEXTURE0 + 1);
@@ -163,10 +165,17 @@ void fillTextures()
 	glBindTexture(GL_TEXTURE_3D, 0);
 	
 	glGenTextures(1, &colorPositionsTexture);
-	texParameter(1);
 	glBindTexture(GL_TEXTURE_3D, colorPositionsTexture);
-	glTexImage3D(GL_TEXTURE_3D, 0, GL_R, tp_w, tp_h, tp_d, 0, GL_R, GL_UNSIGNED_BYTE, texturePositionsData);
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, tp_w, tp_h, tp_d, 0, GL_RED, GL_FLOAT, texturePositionsData);
+	texParameter(1);
+
 	glBindTexture(GL_TEXTURE_3D, 0);
+
+	colorTextLoc = glGetUniformLocation(shaderProgram, "colorTexture");
+	proportionsTextLoc = glGetUniformLocation(shaderProgram, "proportionTexture");
+	glUseProgram(shaderProgram);
+	glUniform1i(colorTextLoc, 0);
+	glUniform1i(proportionsTextLoc, 1);
 }
 
 void bindBuffers()
