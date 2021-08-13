@@ -34,10 +34,10 @@ GLuint VAO = GL_NONE;
 const GLuint tc_w=3;
 const GLuint tc_h=1;
 const GLuint tc_d=1;
-GLuint textureColorData[] = {
-	125, 125, 125,
-	125, 125, 125,
-	125, 125, 125
+GLfloat textureColorData[] = {
+	1.0, 0, 0,
+	0, 1.0, 0,
+	0, 0, 1.0
 };
 
 //Positions/proportions texture data and sizes
@@ -152,21 +152,21 @@ void fillTextures()
 	if (SUBTEXTURE_BINDING)
 	{
 		glBindTexture(GL_TEXTURE_3D, colorTexture);
-		glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, tc_w, tc_h, tc_d, GL_RGB, GL_UNSIGNED_BYTE, textureColorData);
+		glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, tc_w, tc_h, tc_d, GL_RGB, GL_FLOAT, textureColorData);
 	}
 	else
 	{
 		glBindTexture(GL_TEXTURE_3D, colorTexture);
-		glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB, tc_w, tc_h, tc_d, 0, GL_RGB, GL_UNSIGNED_BYTE, textureColorData);
+		glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB, tc_w, tc_h, tc_d, 0, GL_RGB, GL_FLOAT, textureColorData);
 	}
 	texParameter(0);
-	/*glBindTexture(GL_TEXTURE_3D, 0);
+	glBindTexture(GL_TEXTURE_3D, 0);
 	
 	glGenTextures(1, &colorPositionsTexture);
 	texParameter(1);
 	glBindTexture(GL_TEXTURE_3D, colorPositionsTexture);
 	glTexImage3D(GL_TEXTURE_3D, 0, GL_R, tp_w, tp_h, tp_d, 0, GL_R, GL_UNSIGNED_BYTE, texturePositionsData);
-	glBindTexture(GL_TEXTURE_3D, 0);*/
+	glBindTexture(GL_TEXTURE_3D, 0);
 }
 
 void bindBuffers()
