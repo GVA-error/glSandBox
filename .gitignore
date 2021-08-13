@@ -3,6 +3,14 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+
+# windows runtime
+*.dll
+*.lib
+*.exe
+*visualinfo.txt
+*glewinfo.txt
+
 # User-specific files
 *.rsuser
 *.suo
