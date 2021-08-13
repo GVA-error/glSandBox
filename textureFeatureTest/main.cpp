@@ -127,12 +127,14 @@ void drawScene()
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glUseProgram(shaderProgram);
+	glUniform1i(colorTextLoc, 0);
+	glUniform1i(proportionsTextLoc, 1);
+
 	glActiveTexture(GL_TEXTURE0 + 0);
 	glBindTexture(GL_TEXTURE_3D, colorTexture);
 	glActiveTexture(GL_TEXTURE0 + 1);
 	glBindTexture(GL_TEXTURE_3D, colorPositionsTexture);
 
-	// Draw the triangle
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 	glBindVertexArray(0);
@@ -173,9 +175,6 @@ void fillTextures()
 
 	colorTextLoc = glGetUniformLocation(shaderProgram, "colorTexture");
 	proportionsTextLoc = glGetUniformLocation(shaderProgram, "proportionTexture");
-	glUseProgram(shaderProgram);
-	glUniform1i(colorTextLoc, 0);
-	glUniform1i(proportionsTextLoc, 1);
 }
 
 void bindBuffers()
