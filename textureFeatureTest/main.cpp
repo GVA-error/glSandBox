@@ -13,32 +13,47 @@
 #include "fragmentShaderExample.h"
 #include "vertexShaderExample.h"
 
+const bool SUBTEXTURE_BINDING = true;
+
 const GLuint w_width  = 800;
 const GLuint w_height = 600;
 
-SDL_Window* mWindow  = GL_NONE;
+SDL_Window* window  = GL_NONE;
 GLuint shaderProgram = GL_NONE;
+
+GLuint colorTexture = GL_NONE;
+GLuint colorPositionsTexture = GL_NONE;
 
 // drawing data
 GLuint VBO = GL_NONE;
 GLuint VAO = GL_NONE;
 
+//Color texture data and sizes
+const GLuint tc_w=3;
+const GLuint tc_h=1;
+const GLuint tc_d=1;
 GLuint textureColorData[] = {
 	255, 0, 0,
 	0, 255, 0,
 	0, 0, 255
 };
 
+//Positions/proportions texture data and sizes
+const GLuint tp_w = 11;
+const GLuint tp_h = 1;
+const GLuint tp_d = 1;
 GLuint texturePositionsData[] = {
 	0, 0, 0, 0, 0, 125, 255, 255, 255, 255, 255
 };
 
-bool initGlContext(); // gl context
+bool initGlContext(); // init gl, sdl etc.
 bool initShaders();   // init shaderProgram
 void bindBuffers();   // buffer geometry data, init VBO, VAO
+void fillTextures();  // init colorTexture and colorPositionsTexture from textureColorData and texturePositionsData
 bool drawFrame();     // check events and draw scene
 void drawScene();     // draw buffered data
 
+bool is_exitEvent(SDL_Event& ev);
 bool init();
 
 // desctop entery point
@@ -72,6 +87,7 @@ bool init()
 		return false;
 
 	bindBuffers();
+	fillTextures();
 	return true;
 }
 
@@ -94,8 +110,8 @@ bool drawFrame()
 
 	drawScene();
 
-	SDL_GL_SwapWindow(mWindow);
-	SDL_UpdateWindowSurface(mWindow);
+	SDL_GL_SwapWindow(window);
+	SDL_UpdateWindowSurface(window);
 	return true;
 }
 
@@ -106,11 +122,33 @@ void drawScene()
 
 	glUseProgram(shaderProgram);
 
+	glActiveTexture(GL_TEXTURE0 + 0);
+	glBindTexture(GL_TEXTURE_3D, colorTexture);
+	glActiveTexture(GL_TEXTURE0 + 1);
+	glBindTexture(GL_TEXTURE_3D, colorPositionsTexture);
+
 	// Draw the triangle
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 	glBindVertexArray(0);
 
+}
+
+void fillTextures()
+{
+	if (SUBTEXTURE_BINDING)
+	{
+		glBindTexture(GL_TEXTURE_3D, colorTexture);
+		glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, tc_w, tc_h, tc_d, GL_BGR, GL_UNSIGNED_BYTE, textureColorData);
+	}
+	else
+	{
+		glBindTexture(GL_TEXTURE_3D, colorTexture);
+		glTexImage3D(GL_TEXTURE_3D, 0, GL_BGR, tc_w, tc_h, tc_d, 0, GL_BGR, GL_UNSIGNED_BYTE, textureColorData);
+	}
+
+	glBindTexture(GL_TEXTURE_3D, colorPositionsTexture);
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_BGR, tp_w, tp_h, tp_d, 0, GL_BGR, GL_UNSIGNED_BYTE, texturePositionsData);
 }
 
 void bindBuffers()
@@ -193,14 +231,14 @@ bool initGlContext()
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
-	mWindow = SDL_CreateWindow(NULL, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w_width, w_height, SDL_WINDOW_OPENGL);
-	if (mWindow == NULL)
+	window = SDL_CreateWindow(NULL, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w_width, w_height, SDL_WINDOW_OPENGL);
+	if (window == NULL)
 	{
 		std::cerr << "\nERROR:We can\'t create window " << SDL_GetError();
 		return false;
 	}
 
-	SDL_GLContext context = SDL_GL_CreateContext(mWindow);
+	SDL_GLContext context = SDL_GL_CreateContext(window);
 	if (context == NULL)
 	{
 		std::cerr << "\nERROR: We can\'t create context " << SDL_GetError();

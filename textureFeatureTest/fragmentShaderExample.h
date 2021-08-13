@@ -5,12 +5,13 @@ static const char* fragmentShaderSource = R"(
 precision highp float;
 precision highp sampler3D;
 
+in vec3 vColor;
+
 out vec4 color;
-uniform vec4 ourColor;
 
 void main()
 {
-    color = ourColor;
+    color = vec4(vColor, 0.0);
 }
 
 )";
